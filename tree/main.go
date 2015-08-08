@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 func main() {
@@ -44,17 +45,19 @@ func visit(path, indent string) (dirs, files int, err error) {
 	if err != nil {
 		return 0, 0, fmt.Errorf("stat %s: %v", path, err)
 	}
+	if strings.HasPrefix(fi.Name(), ".") {
+		return 0, 0, nil
+	}
 	fmt.Println(fi.Name())
 	if !fi.IsDir() {
 		return 0, 1, nil
 	}
-
 	dir, err := os.Open(path)
 	if err != nil {
 		return 1, 0, fmt.Errorf("open %s: %v", path, err)
 	}
+	defer dir.Close()
 	names, err := dir.Readdirnames(-1)
-	dir.Close()
 	if err != nil {
 		return 1, 0, fmt.Errorf("read dir names %s: %v", path, err)
 	}
